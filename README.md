@@ -15,6 +15,15 @@ https://book.getfoundry.sh/
 
 ## Usage
 
+# 1. 运行计算脚本获取哈希值 (solidity 版本&编译器设置&Pair合约实现)
+forge test --match-test testGetInitCodeHash -vvv
+
+# 2. 记录输出的哈希值
+
+# 3. 更新到 UniswapV2Library.sol 中
+
+# 4. 后续所有测试中都使用这个固定值
+
 ### Build
 
 ```shell
