@@ -14,7 +14,7 @@ Uniswap V2 is a decentralized exchange protocol built on Ethereum that enables a
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/uniswap-v2-foundry.git
+git clone https://github.com/fyZhang66/uniswapV2-foundry.git
 cd uniswap-v2-foundry
 
 # Install dependencies
