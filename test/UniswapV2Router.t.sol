@@ -283,7 +283,7 @@ contract UniswapV2RouterTest is Test {
         assertEq(pair.balanceOf(address(this)), liquidity);
     }
 
-    // Test: minimum amount out
+    // Test6: minimum amount out
     function testAddLiquidityWithMinimumAmounts() public {
         router.addLiquidity(
             address(tokenA),
@@ -312,7 +312,7 @@ contract UniswapV2RouterTest is Test {
         );
     }
 
-    // Test: removeLiquidityWithPermit - 无需预先批准的流动性移除
+    // Test7: removeLiquidityWithPermit(without prove)
     function testRemoveLiquidityWithPermit() public {
         // 设置测试私钥和对应地址
         uint256 privateKey = 0xA11CE;

@@ -5,7 +5,7 @@ import "../lib/forge-std/src/Test.sol";
 import "../src/UniswapV2Pair.sol";
 
 contract GetInitCodeHashTest is Test {
-    function testGetInitCodeHash() public {
+    function testGetInitCodeHash() public pure {
         bytes memory bytecode = type(UniswapV2Pair).creationCode;
         bytes32 hash = keccak256(abi.encodePacked(bytecode));
         console.logBytes32(hash);
