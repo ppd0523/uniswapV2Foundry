@@ -10,7 +10,7 @@ import "./libraries/SafeMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IWETH.sol";
 
-contract UniswapV2Router02 is IUniswapV2Router02 {
+contract UniswapV2Router02 is IUniswapV2Router02{
     using SafeMath for uint;
 
     address public immutable _factory;
@@ -24,13 +24,6 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     constructor(address factoryAddress, address wethAddress){
         _factory = factoryAddress;
         _WETH = wethAddress;
-    }
-    function factory() external view override returns (address) {
-        return _factory;
-    }
-
-    function WETH() external view override returns (address) {
-        return _WETH;
     }
 
     receive() external payable {
