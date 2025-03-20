@@ -1,75 +1,147 @@
-## Foundry
+# Uniswap V2 Foundry Implementation
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This project is a port of Uniswap V2 using the Foundry development framework. It implements the core functionality of Uniswap V2 including the automated market maker (AMM), liquidity pools, and router functionality.
 
-Foundry consists of:
+## Overview
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Uniswap V2 is a decentralized exchange protocol built on Ethereum that enables automated, permissionless trading of ERC-20 tokens without trusted intermediaries. This implementation maintains all the key features of the original Uniswap V2 while leveraging Foundry's advanced testing capabilities.
 
-## Documentation
+## Prerequisites
 
-https://book.getfoundry.sh/
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
-## Usage
+## Installation
 
-# 1. 运行计算脚本获取哈希值 (solidity 版本&编译器设置&Pair合约实现)
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/uniswap-v2-foundry.git
+cd uniswap-v2-foundry
+
+# Install dependencies
+forge install
+```
+
+## Key Features
+
+- **Pair Contracts**: Automated market maker pools for token pairs
+- **Factory Contract**: Creates and manages trading pairs
+- **Router Contract**: Handles user interactions, including liquidity management and swaps
+- **Optimized Gas Usage**: Implements efficient storage patterns and calculations
+- **Flash Swaps**: Allows borrowing from pools within a transaction
+
+## Critical Setup: Init Code Hash
+
+One important step when working with this implementation is calculating the correct init code hash. This is required for the CREATE2 address calculation used in the `pairFor` function.
+
+### Steps to set up init code hash:
+
+1. Calculate the hash by running:
+```bash
 forge test --match-test testGetInitCodeHash -vvv
-
-# 2. 记录输出的哈希值
-
-# 3. 更新到 UniswapV2Library.sol 中
-
-# 4. 后续所有测试中都使用这个固定值
-
-### Build
-
-```shell
-$ forge build
 ```
 
-### Test
+2. Copy the output hash value
 
-```shell
-$ forge test
+3. Update it in the UniswapV2Library.sol file:
+```solidity
+function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
+    (address token0, address token1) = sortTokens(tokenA, tokenB);
+    pair = address(uint160(uint256(keccak256(abi.encodePacked(
+        hex'ff',
+        factory,
+        keccak256(abi.encodePacked(token0, token1)),
+        hex'PASTE_YOUR_HASH_HERE' // Update with the hash from step 2
+    )))));
+}
 ```
 
-### Format
+4. Use this value for all subsequent tests
 
-```shell
-$ forge fmt
+> **Note**: The init code hash must be recalculated anytime the `UniswapV2Pair` implementation changes, including changes to Solidity version or compiler settings.
+
+## Testing
+
+The project includes comprehensive tests for all major components:
+
+```bash
+# Run all tests
+forge test
+
+# Run a specific test
+forge test --match-test testAddLiquidityInitial -vvv
+
+# See gas usage
+forge test --gas-report
 ```
 
-### Gas Snapshots
+Key test files:
+- UniswapV2Factory.t.sol: Tests for pair creation
+- UniswapV2Pair.t.sol: Tests core AMM functionality
+- UniswapV2Router.t.sol: Tests routing and user interaction
+- InitCodeHash.t.sol: Calculates init code hash
 
-```shell
-$ forge snapshot
+## Project Structure
+
+```
+src/
+├── UniswapV2Factory.sol    // Creates pairs and manages protocol fees
+├── UniswapV2Pair.sol       // Core AMM implementation
+├── UniswapV2Router.sol     // User-facing interface for swaps and liquidity
+├── UniswapV2ERC20.sol      // LP token implementation
+├── libraries/              // Helper functions and utilities
+│   ├── Math.sol            
+│   ├── UQ112x112.sol       // Fixed-point math library 
+│   ├── UniswapV2Library.sol
+│   └── TransferHelper.sol  
+└── interfaces/             // Contract interfaces
+
+test/
+├── UniswapV2Pair.t.sol     // Tests for pair functionality 
+├── UniswapV2Factory.t.sol  // Tests for factory functionality
+├── UniswapV2Router.t.sol   // Tests for router functionality
+├── InitCodeHash.t.sol      // Helper to calculate init code hash
+└── mocks/                  // Mock contracts for testing
+    ├── ERC20Mock.sol       
+    └── WETHMock.sol
 ```
 
-### Anvil
+## Configuration
 
-```shell
-$ anvil
+The project uses Foundry's configuration in foundry.toml:
+
+```toml
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+via_ir = true
+solc_version = "0.8.20"
+optimizer = true
+optimizer_runs = 200
 ```
 
-### Deploy
+Note the `via_ir = true` setting, which helps avoid "Stack too deep" errors in complex functions.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+## Key Technical Concepts
 
-### Cast
+- **Constant Product Formula**: `x * y = k` maintains the core AMM mechanism
+- **Price Oracles**: Implemented via cumulative price tracking
+- **Flash Swaps**: Allow tokens to be borrowed and returned in one transaction
+- **Protocol Fees**: Optional 0.05% fee that can be turned on/off
 
-```shell
-$ cast <subcommand>
-```
+## License
 
-### Help
+This project is licensed under GPL-3.0-or-later, the same as the original Uniswap V2.
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+## Acknowledgements
+
+- [Uniswap V2](https://github.com/Uniswap/v2-core)
+- [Foundry](https://github.com/foundry-rs/foundry)
+
+---
+
+## Further Resources
+
+- [Uniswap V2 Documentation](https://docs.uniswap.org/contracts/v2/overview)
+- [Foundry Book](https://book.getfoundry.sh/)
+- [Uniswap V2 Whitepaper](https://uniswap.org/whitepaper.pdf)
